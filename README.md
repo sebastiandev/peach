@@ -77,7 +77,7 @@ app.run(port=3000, host='0.0.0.0')
 
 Theres only one more file we need, which is the config file. You have read about flask, theres usually a config file placed under the source folder. For more info read [here](http://flask.pocoo.org/docs/0.12/config/#configuring-from-files)
 
-```
+```python
 APIS = {
     'api': {
         'prefix': '/api',
@@ -111,7 +111,7 @@ Have some time to read and want to learn more about it? Let's analyze each part 
 # Models
 Just like in ay other framework there are models, these are usually very dependent on the database engine as far as CRUD operations. **Peach** offers a base class for models that abstracts many of the internals of accesing the database, and it also offers a database [proxy](https://github.com/sebastiandev/peach/raw/master/peach/database/proxy.py), with whom the base model interacts with. The database proxy allows to interact in the same way with different database engines. So far theres only one implementation of a proxy, and it is for [MongoDB](https://github.com/sebastiandev/peach/raw/master/peach/database/mongo_proxy.py)
 
-```
+```python
 class People(BaseModel):
 
     collection_name = 'people'
