@@ -1,10 +1,11 @@
 import urllib
 from flask_restful import Resource, request
 from webargs import fields
-from webargs.flaskparser import parser
+from webargs.flaskparser import parser as req_parser
 from datetime import datetime
-from .response import ResponseFactory
 from peach.utils import ObjectDict
+from .response import ResponseFactory
+from .pagination import Pagination
 
 
 class BaseResource(Resource):
@@ -13,24 +14,24 @@ class BaseResource(Resource):
     serializer = None
 
     INCLUDE_ARG = 'include'
-    PAGE_NUMBER_ARG = 'page[number]'
-    PAGE_SIZE_ARG = 'page[size]'
     SORT_ARG = 'sort'
 
     REQUEST_ARGS = {
         'include': fields.DelimitedList(fields.Str(), load_from=INCLUDE_ARG),
-        'page_number': fields.Int(load_from=PAGE_NUMBER_ARG),
-        'page_size': fields.Int(load_from=PAGE_SIZE_ARG),
         'sort': fields.DelimitedList(fields.Str(), load_from=SORT_ARG)
     }
 
     def __init__(self, *args, **kwargs):
         super().__init__()
         self._base_url = request.base_url
-        self._api_url = request.url_root + 'api'
+        self._api_url = request.url_root  # + kwargs.get('prefix').replace('/', '')
         self._db = kwargs.get('database')
+        self._pagination_class = kwargs.get('pagination', Pagination)
 
-        self._args = parser.parse(self.REQUEST_ARGS, request)
+        self.REQUEST_ARGS.update(self._pagination_class.REQUEST_ARGS)
+        self._args = ObjectDict(**req_parser.parse(self.REQUEST_ARGS, request))
+
+        self.pagination = self._pagination_class.from_request_args(self._args)
 
     def base_url_without_params(self, params):
         return self._base_url.replace('/' + params, '')
@@ -51,22 +52,10 @@ class BaseResource(Resource):
     def include_param(self):
         return self._args.include.split(',') if self._args.include else []
 
-    @property
-    def page_number_param(self):
-        return self._args.page_number
-
-    @property
-    def page_size_param(self):
-        return self._args.page_size
-
-    def build_response(self, data, included, meta={}, pagination=None):
-        if pagination:
-            meta.update(self.build_pagination_info(pagination))
-
-        return ResponseFactory.data_response(data=data, meta=meta, included=included)
+    def build_response(self, data, meta=None):
+        return ResponseFactory.data_response(data=data, meta=meta, pagination=self.pagination)
 
     def get(self, ids=None):
-        included = []
         meta = {}
 
         if ids:
@@ -74,16 +63,20 @@ class BaseResource(Resource):
 
         else:
             data = self.get_all()
+            self.pagination.total = self.get_all_count()
 
         data, errors = self.serializer.serialize(data, many=True)
 
-        return self.build_response(data=data, included=included, meta=meta).data()
+        return self.build_response(data=data, meta=meta).data()
 
     def get_by_ids(self, ids):
         return list(self.model.by_id(ids[0]))
 
     def get_all(self):
-        return list(self.model.all())
+        return list(self.model.all(skip=self.pagination.page * self.pagination.size, limit=self.pagination.size))
+
+    def get_all_count(self):
+        return self.model.count()
 
     def post(self):
         new_item, errors = self.serializer.deserialize(self.json_request)
@@ -159,14 +152,14 @@ class FiltrableResource(BaseResource):
             }) for k, v in self._args.items() if k in filters_by_name and v})
 
     def get(self, ids=None):
-        included = []
         meta = {}
         filters = self.requested_filters
 
         if filters:
-            data = self.get_by_filters(filters)
+            data, total_count = self.get_by_filters(filters)
+            self.pagination.total = total_count
             data, errors = self.serializer.serialize(data, many=True)
-            response = self.build_response(data=data, included=included, meta=meta).data()
+            response = self.build_response(data=data, meta=meta).data()
 
         else:
             response = super().get(ids)
@@ -182,6 +175,8 @@ class FiltrableResource(BaseResource):
         :param filters: dict containing the specified filters
         :return: filtered result
         """
+        total_count = 0
+
         if len(filters) > 1:
             condition = {}
             for filter_def in filters.values():
@@ -193,18 +188,29 @@ class FiltrableResource(BaseResource):
                 else:
                     condition.update(filter_class.condition(filter_def.value))
 
-            data = list(self.model.find(condition))
+            total_count = self.model.count(condition)
+            data = list(self.model.find(condition,
+                                        skip=self.pagination.page * self.pagination.size,
+                                        limit=self.pagination.size))
 
         else:
             filter_def = list(filters.values())[0]
             filter_class = filter_def.filter_cls
 
             if filter_class.allow_multiple:
-                data = list(filter_class.apply(self.model, *filter_def.value))
+                total_count = filter_class.count(self.model, *filter_def.value)
+                data = list(filter_class.apply(self.model,
+                                               *filter_def.value,
+                                               skip=self.pagination.page * self.pagination.size,
+                                               limit=self.pagination.size))
 
             else:
-                data = list(filter_class.apply(self.model, filter_def.value))
+                total_count = filter_class.count(self.model, filter_def.value)
+                data = list(filter_class.apply(self.model,
+                                               filter_def.value,
+                                               skip=self.pagination.page * self.pagination.size,
+                                               limit=self.pagination.size))
 
-        return data
+        return data, total_count
 
 

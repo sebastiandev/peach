@@ -21,13 +21,16 @@ class DBProxy(object):
     def delete(self, model, *doc_ids):
         raise NotImplementedError
 
-    def find(self, model, condition, **kwargs):
+    def count(self, model, condition, **kwargs):
         raise NotImplementedError
 
-    def all(self, model):
+    def find(self, model, condition, skip=0, limit=0, **kwargs):
         raise NotImplementedError
 
-    def by_attr(self, model, attr, value, exact=True, many=True, limit=0):
+    def all(self, model, skip=0, limit=0):
+        raise NotImplementedError
+
+    def by_attr(self, model, attr, value, exact=True, many=True, skip=0, limit=0):
         raise NotImplementedError
 
     def by_id(self, model, id):

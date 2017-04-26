@@ -26,18 +26,21 @@ class MongoDBProxy(DBProxy):
         for did in doc_ids:
             self.collection(model).delete_one(model, {'_id': did})
 
-    def find(self, model, condition, **kwargs):
-        for d in self.collection(model).find(condition, **kwargs):
+    def count(self, model, condition, **kwargs):
+        return self.collection(model).find(condition or {}, **kwargs).count()
+
+    def find(self, model, condition, skip=0, limit=0, **kwargs):
+        for d in self.collection(model).find(condition, skip=skip, limit=limit, **kwargs):
             yield model.build(d)
 
-    def by_attr(self, model, attr, value, exact=True, many=True, limit=0):
+    def by_attr(self, model, attr, value, exact=True, many=True, skip=0, limit=0):
         if exact or type(value) is not str:
             params = {attr: value}
         else:
             params = {attr: {"$regex": '.*?{}.*?'.format(value), "$options": 'si'}}
 
         if many:
-            for d in self.find(model, params, limit=limit):
+            for d in self.find(model, params, skip=skip, limit=limit):
                 yield model.build(d)
         else:
             yield model.build(self.collection(model).find_one(params))

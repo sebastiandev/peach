@@ -17,8 +17,12 @@ class BaseModel(ObjectDict):
         raise NotImplementedError()
 
     @classmethod
-    def all(cls):
-        for d in cls.db.find(cls, {}):
+    def count(cls, condition=None, **kwargs):
+        return cls.db.count(cls, condition, **kwargs)
+
+    @classmethod
+    def all(cls, skip=0, limit=0):
+        for d in cls.db.find(cls, {}, skip=skip, limit=limit):
             yield cls.build(d)
 
     @classmethod
@@ -34,12 +38,12 @@ class BaseModel(ObjectDict):
         cls.db.delete(cls, *doc_ids)
 
     @classmethod
-    def find(cls, condition, **kwargs):
-        return cls.db.find(cls, condition, **kwargs)
+    def find(cls, condition, skip=0, limit=0, **kwargs):
+        return cls.db.find(cls, condition, skip=skip, limit=limit, **kwargs)
 
     @classmethod
-    def by_attr(cls, attr, value, exact=True, many=True, limit=0):
-        return cls.db.by_attr(cls, attr, value, exact, many, limit)
+    def by_attr(cls, attr, value, exact=True, many=True, skip=0, limit=0):
+        return cls.db.by_attr(cls, attr, value, exact, many, skip=skip, limit=limit)
 
     @classmethod
     def by_id(cls, id):
