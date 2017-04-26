@@ -1,6 +1,8 @@
 ![Peach](https://github.com/sebastiandev/peach/raw/master/docs/logo.png)
 
-Peaches are sweet and awesome with a strong core, and so is **Peach** which is built on top of the beloved [Flask](https://github.com/pallets/flask) and [Flask-restful](https://github.com/flask-restful/flask-restful/) with a touch of magic to make building apis less tedious, letting you focus on the business logic rather than on the databse abstractions, endpoint routing and configurations, blueprint definitions or request parrsing. It also comes with some nice out of the box funtionalities such as automagic wiring between resource, models, database and model filtering. If you like some of Django's magic, but love flask and its minimalistic philosophy, then you'll love **Peach**.
+Peaches are sweet and awesome with a strong core, and so is **Peach** which is built on top of the beloved [Flask](https://github.com/pallets/flask) and [Flask-restful](https://github.com/flask-restful/flask-restful/) with a touch of magic to make building apis less tedious, letting you focus on the business logic rather than on the databse abstractions, endpoint routing and configurations, blueprint definitions or request parsing. 
+
+**Peach** It also comes with some nice out of the box features such as automagic wiring between resource, models, database and model filtering. If you like some of Django's magic, but love flask and its minimalistic philosophy, then you'll love **Peach**.
 
 Tired of reading docs? Okay, here's a full example of a very simple api from scratch
 
@@ -10,6 +12,8 @@ from peach.rest.resource import FiltrableResource
 from peach.rest.seralizers import ModelSerializer
 from peach.filters.mongo import NameFilter
 from peach.models import BaseModel
+from marshmallow import fields
+
 
 class People(BaseModel):
 
@@ -68,7 +72,7 @@ from peach.utils import module_dir
 peach.INSTANCE_PATH = os.path.dirname(module_dir(__file__))  # Path to the config.py file directory
 
 app = create_app()
-app.run(port=3000, host=0.0.0.0)    
+app.run(port=3000, host='0.0.0.0')    
 ```
 
 Theres only one more file we need, which is the config file. You have read about flask, theres usually a config file placed under the source folder. For more info read [here](http://flask.pocoo.org/docs/0.12/config/#configuring-from-files)
@@ -101,3 +105,7 @@ DATABASE = {
 ```
 
 Thats all you need to get your api up and runnig! Sweet.
+
+Have some time to read and want to learn more about it? Let's analyze each part of the example
+
+
