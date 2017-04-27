@@ -8,6 +8,15 @@ Tired of reading docs? Okay, here's a full example of a very simple api from scr
 
 ```python
 
+import os
+import peach
+from peach import create_app
+from peach.utils import module_dir
+
+
+peach.INSTANCE_PATH = os.path.dirname(module_dir(__file__))  # Path to the config.py file directory
+
+
 from peach.rest.resource import FiltrableResource
 from peach.rest.seralizers import ModelSerializer
 from peach.filters.mongo import NameFilter
@@ -63,14 +72,6 @@ class PeopleResource(FiltrableResource):
     filters = [NameFilter, AddressFilter]
     
     
-import os
-import peach
-from peach import create_app
-from peach.utils import module_dir
-
-
-peach.INSTANCE_PATH = os.path.dirname(module_dir(__file__))  # Path to the config.py file directory
-
 app = create_app()
 app.run(port=3000, host='0.0.0.0')    
 ```
@@ -191,5 +192,102 @@ curl -GET localhost:3000/api/people?filter[name]=foo&page[number]=2  # to get th
 curl -GET localhost:3000/api/people?page[size]=20&page[number]=4  # to use a page size of 20 and get the 4th page
 ```
 
+If you need your results to be sorted by any of the model attributes, you can do it by using the sort keyword.
+
+```shell
+curl -GET localhost:3000/api/people?filter[name]=foo&sort=name
+curl -GET localhost:3000/api/people?page[size]=20&sort=<name,>age
+```
+
+You can specify the ordering by prepending < (Descending) or > (Ascending) the attribute name. You can combine sorting with different attributes by specifying more attributes as a comma separated list.
+
+# Running your app
+In order to run your app you need to create the application object. Before doing anything, and after importing peach, yoou **MUST** define the path for you config file. This is usually placed under the source directory.
+If you have a script that populates your database or does anything that deals with models, you **MUST** set the *INSTANCE_PATH* before doing anything or importing any model
+
+```python
+import peach
+from peach.utils import module_dir
+from peach import create_app
+
+peach.INSTANCE_PATH = module_dir(__file__)  # here the path is taken from the current file
+
+# Do whatever you need now ...
+
+app = create_app()
+app.run(port=3000, host='0.0.0.0') 
+```
+
+# Customizations
+There are always corner cases or different needs that require changes. **Peach** offers a good balance between features, organization and soft rules to allow for further customizations without forcing the code changes to be overcomplicated or look like ad hoc hacks. Nevertheless, there are better places than others to make the needed changes or extensions and here you will get an idea of possible extensions and the best place to put them.
+
+## Pagination
+**Peach** ships with built in pagination but you can provide you own logic as needed. When building the api, some objects are injected to the base resource like the databae proxy, the response factory and the pagination class. If you want to provide your own pagination, simply add one line in your api configuration specifying the module path for you pagination.
+
+```python
+APIS = {
+    'api': {
+        'prefix': '/api',
+        'name': 'People Api',
+        'version': '0.0.1',
+        'pagination': 'peach.rest.pagination.Pagination',
+        'endpoints': [
+            {
+                'name': 'people',
+                'class': 'myapp.__init__.PeopleResource',
+                'urls': [
+                    '/people',
+                    '/people/<string:ids>'
+                ]
+            }
+         ]
+    }
+}
+```
+
+## Response formats
+The response is a way of rendering the returned data from the api. There are many ways of formating a response. A popular one is JSONApi but it is also a very robust and copmlex format. The default response format used in **Peach** resembles a bit of JSONApi but just a bit, if you need to implement something like that or any other formating, the best place to put this is as a new response class. For this you need to define the response factory in the api configuration
+
+```python
+APIS = {
+    'api': {
+        'prefix': '/api',
+        'name': 'People Api',
+        'version': '0.0.1',
+        'response_factory': 'peach.rest.response.ResponseFactory',
+        'endpoints': [
+            {
+                'name': 'people',
+                'class': 'myapp.__init__.PeopleResource',
+                'urls': [
+                    '/people',
+                    '/people/<string:ids>'
+                ]
+            }
+         ]
+    }
+}
+```
+The response factory receives the data to render, any metadata needed to be displayed (in a form of a dict), a pagination object and a variable kwargs for any extra parameters. With this you should be able to render your custom response. Of course, following the JSONApi format, the very same resource seriralization requires a specific formating and to accomplish this you also need to define your model serialization accordingly (for this you'll probably need to dive deeper into marshmallow)
+
+## More dependencies for your resources
+If need to inject more objects/modules to your resources, just extend the [ApiFactory](https://github.com/sebastiandev/peach/raw/master/peach/rest/api.py) and override the *load_conf* method to populate the Conf object with whatever you need. This method receives the app and the api configuration defined in the config.py module.
+
+```python
+from peach.rest.api impport ApiFactory
 
 
+class MyApiFactory(ApiFactory):
+
+    @classmethod
+    def load_conf(cls, app, api_conf):
+        conf = super().load_conf(app, api_conf)
+        # add your stuff here
+        
+```
+
+And to let peach know about it, add the entry in your api config file
+
+```python
+API_FACTORY = 'peach.rest.api.ApiFactory'  # Use you module here instead!
+```
