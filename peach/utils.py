@@ -22,12 +22,15 @@ def module_dir(module_name):
 
 
 def load_resource_class(class_path):
-    parts = class_path.split('.')
-    module = ".".join(parts[:-1])
-    m = __import__(module)
+    try:
+        parts = class_path.split('.')
+        module = ".".join(parts[:-1])
+        m = __import__(module)
 
-    for comp in parts[1:]:
-        m = getattr(m, comp)
+        for comp in parts[1:]:
+            m = getattr(m, comp)
+    except:
+        m = None
 
     return m
 

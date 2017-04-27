@@ -28,13 +28,13 @@ class NameFilter(BaseFilter):
 
     name = 'name'
     value_type = str
-    allow_multiple = False
+    allow_multiple = True
 
     @classmethod
-    def condition(cls, name):
+    def condition(cls, *names):
         return {
             'name': {
-                "$regex": '.*?{}.*?'.format(name),
+                "$regex": ".*?{}.*?".format('|'.join(names)),
                 "$options": 'si'
             }
         }

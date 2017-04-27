@@ -21,8 +21,8 @@ class BaseModel(ObjectDict):
         return cls.db.count(cls, condition, **kwargs)
 
     @classmethod
-    def all(cls, skip=0, limit=0):
-        for d in cls.db.find(cls, {}, skip=skip, limit=limit):
+    def all(cls, skip=0, limit=0, sort=None):
+        for d in cls.db.find(cls, {}, skip=skip, limit=limit, sort=sort):
             yield cls.build(d)
 
     @classmethod
@@ -38,12 +38,12 @@ class BaseModel(ObjectDict):
         cls.db.delete(cls, *doc_ids)
 
     @classmethod
-    def find(cls, condition, skip=0, limit=0, **kwargs):
-        return cls.db.find(cls, condition, skip=skip, limit=limit, **kwargs)
+    def find(cls, condition, skip=0, limit=0, sort=None, **kwargs):
+        return cls.db.find(cls, condition, skip=skip, limit=limit, sort=sort, **kwargs)
 
     @classmethod
-    def by_attr(cls, attr, value, exact=True, many=True, skip=0, limit=0):
-        return cls.db.by_attr(cls, attr, value, exact, many, skip=skip, limit=limit)
+    def by_attr(cls, attr, value, exact=True, many=True, skip=0, limit=0, sort=None):
+        return cls.db.by_attr(cls, attr, value, exact, many, skip=skip, limit=limit, sort=sort)
 
     @classmethod
     def by_id(cls, id):

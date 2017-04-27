@@ -2,6 +2,8 @@ import flask_restful
 from flask import Blueprint, jsonify
 from peach.database.proxy import load_db_proxy
 from peach.utils import load_resource_class, ObjectDict
+from peach.rest.pagination import Pagination
+from peach.rest.response import ResponseFactory
 
 
 class Conf(ObjectDict):
@@ -11,11 +13,16 @@ class Conf(ObjectDict):
 class ApiFactory(object):
 
     @classmethod
-    def load_conf(cls, app):
+    def load_conf(cls, app, api_conf):
         db_conf = app.config.get('DATABASE')
+        pagination_class = load_resource_class(api_conf.get('pagination')) or Pagination
+        response_factory = load_resource_class(api_conf.get('response_factory')) or ResponseFactory
 
         return Conf(**{
-            'database': load_db_proxy(db_conf)
+            'prefix': api_conf.get('prefix'),
+            'database': load_db_proxy(db_conf),
+            'pagination': pagination_class,
+            'response_factory': response_factory
         })
 
     @classmethod
@@ -30,7 +37,7 @@ class ApiFactory(object):
             api_media_type = api_def.get('mediatype')
 
             api_blueprint = Blueprint(api_name, api_id, url_prefix=api_url_prefix)
-            api_blueprint.conf = cls.load_conf(app)
+            api_blueprint.conf = cls.load_conf(app, api_def)
 
             rest_api = RestApi(app=api_blueprint, name=api_name, version=api_version, media_type=api_media_type)
 

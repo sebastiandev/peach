@@ -24,13 +24,10 @@ class DBProxy(object):
     def count(self, model, condition, **kwargs):
         raise NotImplementedError
 
-    def find(self, model, condition, skip=0, limit=0, **kwargs):
+    def find(self, model, condition, skip=0, limit=0, sort=None, **kwargs):
         raise NotImplementedError
 
-    def all(self, model, skip=0, limit=0):
-        raise NotImplementedError
-
-    def by_attr(self, model, attr, value, exact=True, many=True, skip=0, limit=0):
+    def by_attr(self, model, attr, value, exact=True, many=True, skip=0, limit=0, sort=None):
         raise NotImplementedError
 
     def by_id(self, model, id):
