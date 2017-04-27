@@ -51,14 +51,14 @@ class PeopleSerializer(ModelSerializer):
 
 class AddressFilter(BaseFilter):
 
-    name = 'addres'
+    name = 'address'
     value_type = str
     allow_multiple = False
 
     @classmethod
     def condition(cls, address):
         return {
-            'account': {
+            'address': {
                 "$regex": ".*?{}.*?".format(address),
                 "$options": 'si'
             }
