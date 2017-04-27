@@ -12,10 +12,6 @@ class ResponseFactory(object):
     def data_response(data=None, meta=None, pagination=None, **kwargs):
         return DataDocument(data, meta, pagination, **kwargs)
 
-    @staticmethod
-    def error_response(errors=None, **kwargs):
-        return ErrorDocument(errors, **kwargs)
-
 
 class JSONDocument(object):
 
@@ -59,19 +55,4 @@ class DataDocument(JSONDocument):
     def data(self):
         json_data = super().data()
         json_data['data'] = self._data
-        return json_data
-
-
-class ErrorDocument(JSONDocument):
-
-    def __init__(self, errors=None, **kwargs):
-        super().__init__(**kwargs)
-        self._errors = errors if errors else []
-
-    def add_error(self, serialized_item):
-        self._errors.append(serialized_item)
-
-    def data(self):
-        json_data = super().data()
-        json_data['errors'] = self._errors
         return json_data

@@ -1,5 +1,6 @@
 import flask_restful
-from flask import Blueprint, jsonify
+import json
+from flask import Blueprint, jsonify, make_response
 from peach.database.proxy import load_db_proxy
 from peach.utils import load_resource_class, ObjectDict
 from peach.rest.pagination import Pagination
@@ -59,6 +60,12 @@ class ApiException(Exception):
     PATCH = 'patch'
     DELETE = 'delete'
 
+    status = None
+
+    def __init__(self, title, detail):
+        self.title = title
+        self.detail = detail
+
     @property
     def data(self):
         return {
@@ -97,7 +104,7 @@ class RestApi(flask_restful.Api):
 
     def handle_error(self, e):
         if isinstance(e, ApiException):
-            error_response = self.output_json(e.data, e.status)
+            error_response = make_response(jsonify(e.data), e.status)
             error_response = '{}' if e.status == 200 else error_response
 
         else:

@@ -5,6 +5,11 @@ from webargs.flaskparser import parser as req_parser
 from datetime import datetime
 from peach.utils import ObjectDict
 from .response import ResponseFactory
+from .api import ApiException
+
+
+class InvalidDocumentException(ApiException):
+    status = 409
 
 
 class BaseResource(Resource):
@@ -15,7 +20,7 @@ class BaseResource(Resource):
     SORT_ARG = 'sort'
 
     REQUEST_ARGS = {
-        'sort': fields.DelimitedList(fields.Str(), load_from=SORT_ARG)
+        'sort': fields.DelimitedList(fields.Str(), load_from=SORT_ARG, location='query')
     }
 
     def __init__(self, *args, **kwargs):
@@ -81,6 +86,9 @@ class BaseResource(Resource):
 
     def post(self):
         new_item, errors = self.serializer.deserialize(self.json_request)
+        if errors:
+            raise InvalidDocumentException(title="Invalid document", detail=errors)
+
         self.model.add(new_item)
         return {}, 201
 
@@ -118,18 +126,18 @@ class FiltrableResource(BaseResource):
     @staticmethod
     def filter_value_type_to_request_arg_type(name, value_type, allow_multiple, load_from=None):
         if value_type == str:
-            arg_type = fields.Str(load_from=load_from or name)
+            arg_type = fields.Str(load_from=load_from or name, location='query')
         elif value_type == float:
-            arg_type = fields.Float(load_from=load_from or name)
+            arg_type = fields.Float(load_from=load_from or name, location='query')
         elif value_type == int:
-            arg_type = fields.Int(load_from=load_from or name)
+            arg_type = fields.Int(load_from=load_from or name, location='query')
         elif value_type == datetime:
-            arg_type = fields.DateTime(load_from=load_from or name)
+            arg_type = fields.DateTime(load_from=load_from or name, location='query')
         else:
             raise Exception("Unsupported value type '{}' for a request argument".format(value_type))
 
         if allow_multiple:
-            arg_type = fields.DelimitedList(arg_type, load_from=load_from or name)
+            arg_type = fields.DelimitedList(arg_type, load_from=load_from or name, location='query')
 
         return arg_type
 
