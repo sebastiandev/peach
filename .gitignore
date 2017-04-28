@@ -91,4 +91,5 @@ ENV/
 # PyCharm
 .idea/*
 
+./vagrant
 Vagrantfile
