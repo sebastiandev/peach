@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-    name='peach',
+    name='flask-peach',
     packages=['peach'],
     version='0.1',
     description='A Lightweight framework for building restful apis on top of flask',
