@@ -1,5 +1,8 @@
+ipython
 flask
 flask-restful
 pymongo
 marshmallow
 webargs
+
+

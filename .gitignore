@@ -90,3 +90,5 @@ ENV/
 
 # PyCharm
 .idea/*
+
+Vagrantfile
