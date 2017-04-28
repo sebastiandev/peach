@@ -4,6 +4,12 @@ Peaches are sweet and awesome with a strong core, and so is **Peach** which is b
 
 **Peach** also comes with some nice out of the box features such as automagic wiring between resource, models, database and model filtering. If you like some of Django's magic, but love flask and its minimalistic philosophy, then you'll love **Peach**.
 
+**Peach** runs on python3 so in order to install, do:
+
+```shell
+sudo pip3 install flask-peach
+```
+
 Tired of reading docs? Okay, here's a full example of a very simple api from scratch
 
 ```python
