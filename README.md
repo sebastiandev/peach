@@ -209,14 +209,28 @@ You can specify the ordering by prepending < (Descending) or > (Ascending) the a
 
 # Running your app
 In order to run your app you need to create the application object. Before doing anything, and after importing peach, yoou **MUST** define the path for you config file. This is usually placed under the source directory.
-If you have a script that populates your database or does anything that deals with models, you **MUST** set the *INSTANCE_PATH* before doing anything or importing any model
+If you have a script that populates your database or does anything that deals with models, you **MUST** initialize peach with the *instance_path* before doing anything or importing any model.
+
+## Initialization
+For the configuration you can use the flask standard way of defining instance's path, or you can pass the absolute
+path to your config file or you can pass a dictionary. Did I say that this is the first thing you **MUST** do after
+import peach? Yeah...
+
 
 ```python
 import peach
 from peach.utils import module_dir
 from peach import create_app
 
-peach.INSTANCE_PATH = module_dir(__file__)  # here the path is taken from the current file
+# The usual flask way
+peach.init_peach(instance_path=module_dir(__file__))  # here the path is taken from the current file
+
+# Using a custom file (variable names should always be in CAPITALS)
+peach.init_peach(config=path_to_a_file)  # This should be an absolute path to a file
+
+# Using a dict (variable names should always be in CAPITALS)
+peach.init_peach(config={})  # A standard dict, maybe usefull for test cases
+
 
 # Do whatever you need now ...
 
