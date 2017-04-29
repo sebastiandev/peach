@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 import peach
-from peach import create_app
 from peach.utils import module_dir
 
 
-peach.INSTANCE_PATH = module_dir(__file__)
+peach.init_peach(instance_path=module_dir(__file__))
 
 
 from peach.models import BaseModel
@@ -61,7 +60,7 @@ class PeopleResource(FiltrableResource):
 
 
 if __name__ == '__main__':
-    app = create_app()
+    app = peach.create_app()
 
     @app.route("/")
     def main():

@@ -1,5 +1,4 @@
 import flask_restful
-import json
 from flask import Blueprint, jsonify, make_response
 from peach.database.proxy import load_db_proxy
 from peach.utils import load_resource_class, ObjectDict

@@ -91,5 +91,6 @@ ENV/
 # PyCharm
 .idea/*
 
-./vagrant
+.bash_history
+.vagrant/
 Vagrantfile

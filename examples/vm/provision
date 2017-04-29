@@ -7,34 +7,34 @@ user_name="vagrant"
 user_home="/home/$user_name"
 
 # Keep the command history.
-touch "$proj_dir/.bash_history"
-ln -sf "$proj_dir/.bash_history" "$user_home/.bash_history"
-chown --no-dereference $user_name "$proj_dir/.bash_history" "$user_home/.bash_history"
+sudo touch "$proj_dir/.bash_history"
+sudo ln -sf "$proj_dir/.bash_history" "$user_home/.bash_history"
+sudo chown --no-dereference ${user_name} "$proj_dir/.bash_history" "$user_home/.bash_history"
 
 # Aptitude packages
 sudo apt-add-repository -y ppa:mc3man/trusty-media
 
+# MongoDB
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+
 
 ####################################################################################
 # Python 3.6.1
+sudo apt-get -y update
+sudo apt-get remove -y libssl-dev python3.4 python3.4-minimal python3.4-dev python-pip
+sudo apt-get install -y libssl-dev openssl zlib1g-dev
+sudo chown vagrant:vagrant -R /usr/local/
 
-sudo apt-get install libssl-dev openssl
 cd ~
 wget https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tar.xz
 tar xvf Python-3.6.1.tar.xz
 cd Python-3.6.1
 ./configure
 make
-sudo make install
+sudo -u vagrant make install
 ####################################################################################
 
-
-# MongoDB
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
-echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-
-# Setup dependencies
-sudo apt-get -y update
 sudo apt-get -y install `cat $proj_dir/examples/vm/apt-packages | egrep -v "#"`
 
 # Python packages
