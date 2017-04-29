@@ -20,7 +20,7 @@ from peach import create_app
 from peach.utils import module_dir
 
 
-peach.INSTANCE_PATH = os.path.dirname(module_dir(__file__))  # Path to the config.py file directory
+peach.init_peach(os.path.dirname(module_dir(__file__)))  # Path to the config.py file directory
 
 
 from peach.rest.resource import FiltrableResource
@@ -93,7 +93,7 @@ APIS = {
         'endpoints': [
             {
                 'name': 'people',
-                'class': 'myapp.__init__.PeopleResource',
+                'class': 'myapp.resources.PeopleResource',
                 'urls': [
                     '/people',
                     '/people/<string:ids>'
