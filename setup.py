@@ -1,6 +1,10 @@
 import re
 import os
-from distutils.core import setup
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 
 def get_version(package):
@@ -25,8 +29,7 @@ setup(
         'Flask >= 0.10.1',
         'flask-restful',
         'marshmallow',
-        'webargs',
-        'pymongo'
+        'webargs'
     ],
     classifiers=[
         'Environment :: Web Environment',
