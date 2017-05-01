@@ -25,7 +25,8 @@ setup(
         'Flask >= 0.10.1',
         'flask-restful',
         'marshmallow',
-        'webargs'
+        'webargs',
+        'pymongo'
     ],
     classifiers=[
         'Environment :: Web Environment',

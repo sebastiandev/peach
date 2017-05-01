@@ -49,14 +49,19 @@ class BaseResource(Resource):
 
     @property
     def url_query_string(self):
-        return urllib.parse.unquote_plus(request.query_string)
+        return urllib.parse.unquote_plus(request.query_string.decode())
 
     @property
     def sort_param(self):
         return self._args.get('sort')
 
     def build_response(self, data, meta=None):
-        return ResponseFactory.data_response(data=data, meta=meta, pagination=self.pagination)
+        return ResponseFactory.data_response(self.api_endpoint,
+                                             self._base_url,
+                                             self.url_query_string,
+                                             data=data,
+                                             meta=meta,
+                                             pagination=self.pagination)
 
     def get(self, ids=None):
         meta = {}

@@ -2,6 +2,8 @@ import flask
 from peach.rest.api import ApiFactory
 
 
+__version__ = '0.0.2'
+
 INSTANCE_PATH = None
 INSTANCE_CONFIG = None
 
@@ -16,8 +18,18 @@ def init_peach(instance_path=None, config=None):
     elif config:
         INSTANCE_CONFIG = config
 
+    else:
+        Exception("Please define one of INSTANCE_PATH or INSTANCE_CONFIG")
+
+
+def validate_peach_env():
+    if not INSTANCE_CONFIG and not INSTANCE_PATH:
+        raise Exception("Peach not initialized. Please define one of INSTANCE_PATH or INSTANCE_CONFIG")
+
 
 def get_config():
+    validate_peach_env()
+
     if INSTANCE_CONFIG:
         conf = flask.config.Config('/')
         if isinstance(INSTANCE_CONFIG, dict):
@@ -41,6 +53,8 @@ def get_config():
 
 
 def create_app():
+    validate_peach_env()
+
     app = flask.Flask(__name__)
     app.config = get_config()
 

@@ -12,11 +12,11 @@ class BaseFilter(object):
 
     @classmethod
     def apply(cls, model, *args, **kwargs):
-        kwargs.pop('sort', None)
+        sort = kwargs.pop('sort', None)
         skip = kwargs.pop('skip', None)
         limit = kwargs.pop('limit', None)
 
-        return model.find(cls.condition(*args, **kwargs), skip=skip, limit=limit)
+        return model.find(cls.condition(*args, **kwargs), skip=skip, limit=limit, sort=sort)
 
     @classmethod
     def count(cls, model, *args, **kwargs):
