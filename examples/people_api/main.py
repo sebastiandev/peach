@@ -18,9 +18,6 @@ class People(BaseModel):
     collection_name = 'people'
 
     def __init__(self, name=None, age=None, address=None, **kwargs):
-        if 'type' in kwargs:
-            kwargs.pop('type')
-
         super().__init__(**{
             'name': name,
             'age': age,
