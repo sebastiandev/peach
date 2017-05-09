@@ -16,24 +16,23 @@ def get_version(package):
 
 
 setup(
-    name='flask-peach',
+    name='python-peach',
     packages=['peach'],
     version=get_version('peach'),
-    description='A Lightweight framework for building restful apis on top of flask',
+    description='A Lightweight framework for building restful apis',
     author='Sebastian Packmann',
     author_email='devsebas@gmail.com',
     url='https://github.com/sebastiandev/peach',
     download_url='https://github.com/sebastiandev/peach/archive/0.1.tar.gz',
-    keywords=['flask', 'python', 'api', 'framework', 'restful'],
+    keywords=['flask', 'falcon', 'python', 'api', 'framework', 'restful'],
     install_requires=[
-        'Flask >= 0.10.1',
-        'flask-restful',
         'marshmallow',
         'webargs'
     ],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Flask',
+        'Framework :: Falcon',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Operating System :: OS Independent',
