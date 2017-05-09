@@ -32,7 +32,6 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Flask',
-        'Framework :: Falcon',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Operating System :: OS Independent',
