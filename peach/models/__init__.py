@@ -1,4 +1,4 @@
-from peach import get_config
+from peach import Peach
 from peach.database.proxy import load_db_proxy
 from peach.utils import ObjectDict
 
@@ -6,7 +6,7 @@ from peach.utils import ObjectDict
 class BaseModel(ObjectDict):
 
     type = None
-    db = load_db_proxy(get_config()['DATABASE'])
+    db = load_db_proxy(Peach().database_config)
 
     @property
     def id(self):

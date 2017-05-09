@@ -21,7 +21,7 @@ The last command should take you to the virtual machine root. From there you can
 
 ## People example
 This is a simple example that shows how to create a simple api from scratch. For simplicity all the needed modules
-were placed in a single file.
+were placed in a single file. You can find the example app for flask and falcon web frameworks.
 
 After connecting to the vm, lets set up the env variables for python
 
@@ -32,14 +32,14 @@ export PYTHONPATH=/vagrant/:/vagrant/examples
 Before launching the api, it would be nice to have some data on the database. Run a simple script that loads some data
 
 ```
-cd examples/people_api
+cd examples/people_api/flask
 python3 load_people.py
 ```
 
 Now you are ready to launch the api
 
 ```shell
-python3 main.py
+python3 app.py
 ```
 
 Now just point your browser to the api and start making requests to the following url:

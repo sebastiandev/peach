@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-import peach
+from peach import Peach
+from peach.handlers.flask import FlaskHandler
 from peach.utils import module_dir
 
 
-peach.init_peach(instance_path=module_dir(__file__))
+Peach.init(config=module_dir(__file__), handler=FlaskHandler())
 
 
-from main import People
+from app import People
 
 
 People.add(People(name='Lionel', age=28, address='Somewhere in Barcelona'))

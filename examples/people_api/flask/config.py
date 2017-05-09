@@ -1,16 +1,14 @@
-API_FACTORY = 'peach.rest.api.ApiFactory'
-
 APIS = {
     'api': {
         'prefix': '/api',
         'name': 'People Api',
         'version': '0.0.1',
         'pagination': 'peach.rest.pagination.Pagination',
-        'response_factory': 'peach.rest.response.ResponseFactory',
+        'response_factory': 'peach.rest.response.ResponseDocumentFactory',
         'endpoints': [
             {
                 'name': 'people',
-                'class': 'people_api.main.PeopleResource',
+                'class': 'examples.people_api.flask.app.PeopleResource',
                 'urls': [
                     '/people',
                     '/people/<string:ids>'

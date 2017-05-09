@@ -8,7 +8,7 @@ class JSONDocumentError(Exception):
     pass
 
 
-class ResponseFactory(object):
+class ResponseDocumentFactory(object):
 
     @staticmethod
     def data_response(endpoint,

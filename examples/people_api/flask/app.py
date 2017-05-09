@@ -1,16 +1,17 @@
 #!/usr/bin/env python
-import peach
+from peach import Peach
+from peach.handlers.flask import FlaskHandler
 from peach.utils import module_dir
 
 
-peach.init_peach(instance_path=module_dir(__file__))
+Peach.init(config=module_dir(__file__), handler=FlaskHandler())
 
 
 from peach.models import BaseModel
 from peach.rest.serializers import ModelSerializer, fields
 from peach.filters.mongo import NameFilter
 from peach.filters import BaseFilter
-from peach.rest.resource import FiltrableResource
+from peach.handlers.flask.resource import FlaskBaseResource
 
 
 class People(BaseModel):
@@ -52,7 +53,7 @@ class AgeFilter(BaseFilter):
         return {'age': age}
 
 
-class PeopleResource(FiltrableResource):
+class PeopleResource(FlaskBaseResource):
 
     model = People
     serializer = PeopleSerializer
@@ -60,10 +61,4 @@ class PeopleResource(FiltrableResource):
 
 
 if __name__ == '__main__':
-    app = peach.create_app()
-
-    @app.route("/")
-    def main():
-        return "people-server"
-
-    app.run(port=3000, host='0.0.0.0')
+    Peach().run()

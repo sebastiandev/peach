@@ -1,65 +1,52 @@
-import flask
-from peach.rest.api import ApiFactory
 
 
-__version__ = '0.0.2'
-
-INSTANCE_PATH = None
-INSTANCE_CONFIG = None
+__version__ = '0.1.0'
 
 
-def init_peach(instance_path=None, config=None):
-    global INSTANCE_PATH
-    global INSTANCE_CONFIG
+class WebHandler(object):
 
-    if instance_path:
-        INSTANCE_PATH = instance_path
+    def __init__(self, api_factory):
+        self._factory = api_factory
 
-    elif config:
-        INSTANCE_CONFIG = config
+    def get_config(self, config):
+        raise NotImplementedError
 
-    else:
-        Exception("Please define one of INSTANCE_PATH or INSTANCE_CONFIG")
+    def create_app(self, config):
+        raise NotImplementedError
 
 
-def validate_peach_env():
-    if not INSTANCE_CONFIG and not INSTANCE_PATH:
-        raise Exception("Peach not initialized. Please define one of INSTANCE_PATH or INSTANCE_CONFIG")
+class Peach(object):
 
+    __config = None
+    __handler = None
 
-def get_config():
-    validate_peach_env()
+    @classmethod
+    def init(cls, config, handler):
+        cls.__config = config
+        cls.__handler = handler
 
-    if INSTANCE_CONFIG:
-        conf = flask.config.Config('/')
-        if isinstance(INSTANCE_CONFIG, dict):
-            conf.from_mapping(**INSTANCE_CONFIG)
+    def __init__(self):
+        if not isinstance(self.__config, dict) and \
+           not isinstance(self.__config, str) and \
+           not isinstance(self.__config, object):
+            raise Exception("Config must be a dict or a path to the config file or directory")
 
-        else:
-            conf.from_pyfile(INSTANCE_CONFIG, silent=False)
+        if not self.__handler:
+            raise Exception("Must specify a handler before creating a Peach instance")
 
-    else:
-        try:
-            conf = flask.current_app.config
-        except:
-            # Trick to let flask automagically load the config file
-            app = flask.Flask('Dummy', instance_path=INSTANCE_PATH, instance_relative_config=True)
-            app.config.from_object('config')
-            app.config.from_pyfile('config.py')
-            conf = app.config
-            del app
+    @property
+    def config(self):
+        return self.__handler.get_config(self.__config)
 
-    return conf
+    @property
+    def database_config(self):
+        return self.__handler.get_config(self.__config)['DATABASE']
 
+    def create_app(self):
+        return self.__handler.create_app(self.config)
 
-def create_app():
-    validate_peach_env()
+    def run(self, host='0.0.0.0', port=3000, app=None):
+        app = app or self.create_app()
+        self.__handler.run(app, host, port)
 
-    app = flask.Flask(__name__)
-    app.config = get_config()
-
-    for blueprint in ApiFactory().build(app):
-        app.register_blueprint(blueprint)
-
-    return app
 
