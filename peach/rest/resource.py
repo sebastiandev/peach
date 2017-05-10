@@ -149,7 +149,7 @@ class BaseResource(object):
 
         data, errors = self.serializer.serialize(data, many=True)
 
-        return self.build_response(data=data, meta=meta, pagination=pagination).data()
+        return self.build_response(data=data, meta=meta, pagination=pagination).data(), 200
 
     def get_by_ids(self, ids):
         return list(self.model.by_id(ids[0]))

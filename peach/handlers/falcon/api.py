@@ -2,6 +2,7 @@ import json
 import re
 import falcon
 from peach.rest.base_api import ApiFactory, ApiException
+from peach.handlers.falcon  import int_to_falcon_status
 
 
 class FalconApiFactory(ApiFactory):
@@ -49,14 +50,10 @@ class FalconRestApi(object):
 
         app._media_type = self._media_type
         app.add_route('/{}'.format(prefix), EntryPoint())
+        app.add_error_handler(ApiException, self.handle_error)
 
-    # def handle_error(self, e):
-    #     if isinstance(e, ApiException):
-    #         error_response = make_response(jsonify(e.data), e.status)
-    #         error_response = '{}' if e.status == 200 else error_response
-    #
-    #     else:
-    #         error_response = super().handle_error(e)
-    #
-    #     return error_response
+    def handle_error(self, ex, req, resp, params):
+        resp.body = json.dumps(ex.data)
+        resp.status = int_to_falcon_status(ex.status)
+
 

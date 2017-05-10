@@ -1,13 +1,18 @@
 import falcon
 import os
 from wsgiref import simple_server
-from .api import FalconApiFactory
 from peach import WebHandler
+
+
+def int_to_falcon_status(status):
+    http_code_name = "HTTP_{}".format(int(status))
+    return getattr(falcon, http_code_name)
 
 
 class FalconHandler(WebHandler):
 
     def __init__(self, api_factory=None):
+        from .api import FalconApiFactory
         super().__init__(api_factory or FalconApiFactory())
 
     def _load_config_from_pyfile(self, filename):
