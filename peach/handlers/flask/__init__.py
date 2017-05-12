@@ -10,26 +10,27 @@ class FlaskHandler(WebHandler):
         super().__init__(api_factory or FlaskApiFactory())
 
     def get_config(self, config):
-        conf = flask.config.Config('/')
+        # Config is a path, whats call in flask, Instance path
+        try:
+            conf = flask.current_app.config
 
-        if isinstance(config, dict):
-            conf.from_mapping(**config)
+        except:
+            # Trick to let flask automagically load the config file
+            if isinstance(config, dict):
+                app = flask.Flask('Dummy')
+                app.config.from_mapping(**config)
 
-        elif os.path.isfile(config):
-            conf.from_pyfile(config, silent=False)
+            elif os.path.isfile(config):
+                app = flask.Flask('Dummy')
+                app.config.from_pyfile(config, silent=False)
 
-        else:
-            # Config is a path, whats call in flask, Instance path
-            try:
-                conf = flask.current_app.config
-
-            except:
-                # Trick to let flask automagically load the config file
+            else:
                 app = flask.Flask('Dummy', instance_path=config, instance_relative_config=True)
                 app.config.from_object('config')
                 app.config.from_pyfile('config.py')
-                conf = app.config
-                del app
+
+        conf = app.config
+        del app
 
         return conf
 

@@ -22,7 +22,7 @@ class ApiFactory(object):
     def _api_definitions(self, app_conf):
         definitions = ObjectDict()
 
-        for api_id, api_def in iter(app_conf.get('APIS', {}).items()):
+        for api_id, api_def in app_conf.get('APIS', {}).items():
             definitions[api_id] = ObjectDict(**{
                 'name': api_def.get('name', api_id).title(),
                 'prefix': api_def.get('prefix'),
@@ -40,7 +40,7 @@ class ApiFactory(object):
                     'params': self.load_api_resource_params(app_conf, api_def)
                 })
 
-            return definitions
+        return definitions
 
     def _build_api(self, app, api_def):
         raise NotImplementedError

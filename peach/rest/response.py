@@ -70,7 +70,7 @@ class DataDocument(JSONDocument):
         }
 
         if pagination.last is not None:
-            pag_info['pagination']['page-count'] = pagination.last + 1
+            pag_info['pagination']['page-count'] = pagination.last + 1  # counters/indexes are zero based
 
         return pag_info
 
@@ -80,23 +80,39 @@ class DataDocument(JSONDocument):
         def _set_pagination_param(base_url, querystring, page_number):
             page_number_str = pagination.PAGE_NUMBER_ARG.replace('[', '\[').replace(']', '\]')
 
+            # If there was no pagination info on the url, lets add the page number
             if pagination.PAGE_NUMBER_ARG not in querystring:
                 querystring += '&{}={}'.format(pagination.PAGE_NUMBER_ARG, page_number)
+
             else:
-                querystring = re.sub('(.*?{})=\d+(.*?)'.format(page_number_str), r'\1' + '={}'.format(str(page_number) + r'\2'),
-                             querystring)
+                # Update the page number by extracting the old number and replacing it with the new
+                querystring = re.sub('(.*?{})=\d+(.*?)'.format(page_number_str),
+                                     r'\1' + '={}'.format(str(page_number) + r'\2'),
+                                     querystring)
+
+            if pagination.PAGE_SIZE_ARG not in querystring:
+                querystring += '&{}={}'.format(pagination.PAGE_SIZE_ARG, pagination.size)
+
+            if querystring.startswith('&'):
+                querystring = querystring[1:]
 
             return base_url + '?' + urllib.parse.quote_plus(querystring)
 
         if 0 < pagination.page:
             pagination_links['first-page'] = _set_pagination_param(request_base_url, request_querystring, 0)
-            pagination_links['previous-page'] = _set_pagination_param(request_base_url, request_querystring, pagination.page - 1)
+            pagination_links['previous-page'] = _set_pagination_param(request_base_url,
+                                                                      request_querystring,
+                                                                      pagination.page - 1)
 
         if pagination.page < pagination.last:
-            pagination_links['next-page'] = _set_pagination_param(request_base_url, request_querystring, pagination.page + 1)
+            pagination_links['next-page'] = _set_pagination_param(request_base_url,
+                                                                  request_querystring,
+                                                                  pagination.page + 1)
 
         if pagination.page != pagination.last:
-            pagination_links['last-page'] = _set_pagination_param(request_base_url, request_querystring, pagination.last)
+            pagination_links['last-page'] = _set_pagination_param(request_base_url,
+                                                                  request_querystring,
+                                                                  pagination.last)
 
         return pagination_links
 

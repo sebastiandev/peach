@@ -2,7 +2,7 @@ import json
 import re
 import falcon
 from peach.rest.base_api import ApiFactory, ApiException
-from peach.handlers.falcon  import int_to_falcon_status
+from peach.handlers.falcon import int_to_falcon_status
 
 
 class FalconApiFactory(ApiFactory):
