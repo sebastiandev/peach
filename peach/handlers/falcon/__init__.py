@@ -39,7 +39,7 @@ class FalconHandler(WebHandler):
         if isinstance(config, str) and os.path.isfile(config):
             config = self._load_config_from_pyfile(config)
 
-        elif isinstance(config, object):
+        elif isinstance(config, object) and not isinstance(config, dict):
             config = self._config_from_object(config)
 
         return config

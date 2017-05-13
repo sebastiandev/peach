@@ -1,11 +1,10 @@
 import pytest
 import json
 from peach import Peach
-from peach.handlers.flask import FlaskHandler
+from peach.handlers.falcon import FalconHandler
 
 
 test_config = {
-    'TESTING': True,
     'APIS': {
         'api': {
             'prefix': '/api',
@@ -16,10 +15,10 @@ test_config = {
             'endpoints': [
                 {
                     'name': 'people',
-                    'class': 'tests.test_flask_resource.PeopleResource',
+                    'class': 'tests.test_falcon_resource.PeopleResource',
                     'urls': [
                         '/people',
-                        '/people/<string:ids>'
+                        '/people/{ids}'
                     ]
                 }
             ]
@@ -34,7 +33,7 @@ test_config = {
 }
 
 
-Peach.init(test_config, FlaskHandler())
+Peach.init(test_config, FalconHandler())
 
 
 from marshmallow import fields
@@ -42,8 +41,9 @@ from pymongo import MongoClient
 from peach.rest.serializers import ModelSerializer
 from peach.filters import BaseFilter
 from peach.models import BaseModel
-from peach.handlers.flask.resource import FlaskBaseResource
+from peach.handlers.falcon.resource import FalconBaseResource
 from peach.filters.mongo import NameFilter
+from falcon import testing
 
 
 class People(BaseModel):
@@ -85,7 +85,7 @@ class AgeFilter(BaseFilter):
         return {'age': age}
 
 
-class PeopleResource(FlaskBaseResource):
+class PeopleResource(FalconBaseResource):
     model = People
     serializer = PeopleSerializer
     filters = [NameFilter, AgeFilter]
@@ -106,11 +106,11 @@ def tester(request):
 
     request.addfinalizer(fin)
 
-    return Peach().create_app().test_client()
+    return testing.TestClient(Peach().create_app())
 
 
 def test_get_all(tester):
-    response = json.loads(tester.get('/api/people').data)
+    response = json.loads(tester.simulate_get('/api/people').content.decode())
 
     assert 6 == len(response['data'])
 
@@ -119,14 +119,14 @@ def test_get_all(tester):
 
 
 def test_get_by_name(tester):
-    response = json.loads(tester.get('/api/people?filter[name]=Foo').data)
+    response = json.loads(tester.simulate_get('/api/people', query_string='filter[name]=Foo').content.decode())
 
     assert 1 == len(response['data'])
     assert 'Foo' == response['data'][0]['name']
 
 
 def test_get_by_age(tester):
-    response = json.loads(tester.get('/api/people?filter[age]=22').data)
+    response = json.loads(tester.simulate_get('/api/people', query_string='filter[age]=22').content.decode())
 
     assert 2 == len(response['data'])
 
@@ -136,19 +136,20 @@ def test_get_by_age(tester):
 
 def test_get_with_custom_elem_page_size(tester):
     for psize in [1, 2, 3, 4]:
-        response = json.loads(tester.get('/api/people?page[size]={}'.format(psize)).data)
+        response = json.loads(tester.simulate_get('/api/people', query_string='page[size]={}'.format(psize)).content.decode())
         assert psize == len(response['data'])
 
 
 def test_get_sorted(tester):
     # Test ascending sorting
-    response = json.loads(tester.get('/api/people?sort=name').data)
+    response = json.loads(tester.simulate_get('/api/people', query_string='sort=name').content.decode())
 
     assert response['data'][0]['name'] == 'David'
     assert response['data'][-1]['name'] == 'Paul'
 
     # Test descending sorting
-    response = json.loads(tester.get('/api/people?sort=<name').data)
+    response = json.loads(tester.simulate_get('/api/people', query_string='sort=<name').content.decode())
 
     assert response['data'][0]['name'] == 'Paul'
     assert response['data'][-1]['name'] == 'David'
+
